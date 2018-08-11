@@ -6,6 +6,50 @@ endif::[]
 image::skaffold.png[Skaffold, 222,93]
 //end::title[]
 ---
+
+= Things I've Added
+
+== Manifest Templating
+=== Goal
+allow k8s manifests to have basic variable substitution
+
+=== Reason
+to allow basic configuration values to be defined by CI environment
+for use-cases such as environment dependent ingress rules or other basic configuration
+[source,yaml]
+deploy:
+  kubectl:
+    manifests:
+      - k8s-*
+    values:
+      Name: '{{ .POD_NAME | default "default-pod-name" }}'
+
+== Build Arg Templating
+=== Goal
+allow environment variables to be passed to docker build buildArgs
+
+=== Reason
+allow configuration from the environment (such as secrets) to be used instead of hardcoded values.
+[source,yaml]
+build:
+  artifacts:
+    - imageName: gcr.io/k8s-skaffold/skaffold-example
+      docker:
+        buildArgs:
+          message: '{{ .MESSAGE | default "default-message" }}'
+          name: '{{ .NAME | required }}'
+
+
+== Rollout status on deploy step
+=== Goal
+to be able to monitor a deployment rollout during `skaffold deploy`
+
+=== Reason
+CI pipelines should fail if a deployment fails to rollout. this should be similar to helm --wait
+
+image::rollout-status-screenshot.png[Rollout Status Example]
+
+
 [caption="Build status", link="https://travis-ci.org/GoogleContainerTools/skaffold"]
 image::https://travis-ci.org/GoogleContainerTools/skaffold.svg?branch=master[Build Status]
 [caption="Code Coverage", link="https://codecov.io/gh/GoogleContainerTools/skaffold"]
@@ -189,15 +233,15 @@ $ skaffold run
 
 == Documentation
 
-Documentation for latest release: 
+Documentation for latest release:
 
-- HTML: https://storage.googleapis.com/skaffold/releases/latest/docs/index.html  
-- PDF: https://storage.googleapis.com/skaffold/releases/latest/docs/index.pdf  
+- HTML: https://storage.googleapis.com/skaffold/releases/latest/docs/index.html
+- PDF: https://storage.googleapis.com/skaffold/releases/latest/docs/index.pdf
 
-Documentation for latest build: 
+Documentation for latest build:
 
-- HTML: https://storage.googleapis.com/skaffold/builds/latest/docs/index.html  
-- PDF: https://storage.googleapis.com/skaffold/builds/latest/docs/index.pdf  
+- HTML: https://storage.googleapis.com/skaffold/builds/latest/docs/index.html
+- PDF: https://storage.googleapis.com/skaffold/builds/latest/docs/index.pdf
 
 
 //tag::more_examples[]
@@ -214,8 +258,8 @@ Documentation for latest build:
 - link:https://groups.google.com/forum/#!forum/skaffold-users[skaffold-users mailing list]
 - link:https://kubernetes.slack.com/messages/CABQMSZA6/[#skaffold on Kubernetes Slack]
 
-There is a bi-weekly Skaffold users meeting at 9:30am-10am PST hosted on hangouts under "skaffold". 
-Everyone is welcome to add suggestions to the link:https://docs.google.com/document/d/1mnCC_fAI3pmg3Vb2nMJyPk8Qtjjuapw_BTyqI_dX7sk/edit[agenda] and attend. 
+There is a bi-weekly Skaffold users meeting at 9:30am-10am PST hosted on hangouts under "skaffold".
+Everyone is welcome to add suggestions to the link:https://docs.google.com/document/d/1mnCC_fAI3pmg3Vb2nMJyPk8Qtjjuapw_BTyqI_dX7sk/edit[agenda] and attend.
 Join the link:https://groups.google.com/forum/#!forum/skaffold-users[skaffold-users mailing list] to get the calendar invite directly on your calendar.
 //end::community[]
 

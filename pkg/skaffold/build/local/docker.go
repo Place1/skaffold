@@ -32,6 +32,20 @@ import (
 func (b *Builder) buildDocker(ctx context.Context, out io.Writer, workspace string, a *latest.DockerArtifact) (string, error) {
 	initialTag := util.RandomID()
 
+	for i, arg := range a.BuildArgs {
+		tmpl, err := util.ParseEnvTemplate(*arg)
+		if err != nil {
+			return "", errors.Wrap(err, "parsing build arg template")
+		}
+
+		rendered, err := util.ExecuteEnvTemplate(tmpl, nil)
+		if err != nil {
+			return "", errors.Wrap(err, "substituting variables in build arg template")
+		}
+
+		a.BuildArgs[i] = &rendered
+	}
+
 	if b.cfg.UseDockerCLI || b.cfg.UseBuildkit {
 		dockerfilePath, err := docker.NormalizeDockerfilePath(workspace, a.DockerfilePath)
 		if err != nil {

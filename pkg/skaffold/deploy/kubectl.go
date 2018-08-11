@@ -91,6 +91,11 @@ func (k *KubectlDeployer) Deploy(ctx context.Context, out io.Writer, builds []bu
 		return nil, errors.Wrap(err, "apply")
 	}
 
+	err = k.kubectl.RolloutStatus(ctx, out, manifests)
+	if err != nil {
+		return nil, errors.Wrap(err, "rollout status")
+	}
+
 	return parseManifestsForDeploys(k.kubectl.Namespace, updated)
 }
 
@@ -159,6 +164,11 @@ func (k *KubectlDeployer) readManifests(ctx context.Context) (kubectl.ManifestLi
 		}
 
 		manifests.Append(buf)
+	}
+
+	manifests, err = manifests.SubstituteVariables(k.Values)
+	if err != nil {
+		return nil, errors.Wrap(err, "substituting variables in manifests")
 	}
 
 	for _, m := range k.RemoteManifests {

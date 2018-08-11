@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Name}}
+  labels:
+    app: {{.Name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Name}}
+    spec:
+      containers:
+      - name: getting-started
+        image: gcr.io/k8s-skaffold/skaffold-example
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Name}}-service
+spec:
+  type: ClusterIP
+  selector:
+    name: {{.Name}}
+  ports:
+    - port: 8000
+      targetPort: 8000
+
+---
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: my-daemonset
+  labels:
+    app: my-app
+spec:
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: getting-started
+        image: gcr.io/k8s-skaffold/skaffold-example
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: my-statefulset
+  labels:
+    app: my-statefulset
+spec:
+  replicas: 1
+  serviceName: my-statefulset
+  selector:
+    matchLabels:
+      app: my-statefulset
+  template:
+    metadata:
+      labels:
+        app: my-statefulset
+    spec:
+      containers:
+      - name: getting-started
+        image: gcr.io/k8s-skaffold/skaffold-example
+
